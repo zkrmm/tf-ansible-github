@@ -15,7 +15,7 @@ provider "kubernetes" {
 
 variable "project" { default = "demo-tf" }
 variable "app"     { default = "nginx-unpriv" }
-variable "image"   { default = "nginxinc/nginx-unprivileged:stable" }
+variable "image"   { default = "registry.access.redhat.com/ubi8/httpd-24" }
 
 resource "kubernetes_namespace_v1" "ns" {
   metadata { name = var.project }

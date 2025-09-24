@@ -1,0 +1,28 @@
+# ansible/post-tf.yml
+---
+- name: Post-provision Terraform - create Route and print URL
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    project: demo-tf
+    app: nginx-unpriv
+  tasks:
+    - name: Wait for deployment to be ready
+      command: >
+        oc -n {{ project }} rollout status deployment/{{ app }} --timeout=300s
+
+    - name: Create Route
+      command: >
+        oc -n {{ project }} expose service/{{ app }} --name {{ app }}
+      register: expose_out
+      failed_when: expose_out.rc not in [0, 3] # Fails if error code is not 0 (created) or 3 (already exists)
+
+    - name: Get Route host
+      command: >
+        oc -n {{ project }} get route/{{ app }} -o jsonpath={.spec.host}
+      register: route_host
+
+    - name: Print Application URL
+      debug:
+        msg: "✅ Application URL: http://{{ route_host.stdout }}"
